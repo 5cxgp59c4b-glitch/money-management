@@ -17,6 +17,7 @@ interface Props {
 interface JsonBackup {
   version: number
   exportedAt: string
+  balance: number
   categories: Category[]
   expenses: Expense[]
   incomeCategories: IncomeCategory[]
@@ -43,11 +44,15 @@ export default function ExportImport({ categories, expenses, incomeCategories, i
   const jsonInputRef = useRef<HTMLInputElement>(null)
   const csvInputRef = useRef<HTMLInputElement>(null)
 
+  const totalExpense = expenses.reduce((s, e) => s + e.amount, 0)
+  const totalIncome = incomes.reduce((s, i) => s + i.amount, 0)
+
   // ── エクスポート ───────────────────────────────────
   const exportJson = () => {
     const backup: JsonBackup = {
       version: 2,
       exportedAt: new Date().toISOString(),
+      balance: totalIncome - totalExpense,
       categories,
       expenses,
       incomeCategories,
@@ -69,7 +74,13 @@ export default function ExportImport({ categories, expenses, incomeCategories, i
           `"${e.memo.replace(/"/g, '""')}"`,
         ].join(',')
       )
-    const csv = '﻿' + [header, ...rows].join('\n')
+    const summary = [
+      '',
+      `# 収入合計,,${totalIncome},`,
+      `# 支出合計,,${totalExpense},`,
+      `# 残金,,${totalIncome - totalExpense},`,
+    ]
+    const csv = '﻿' + [header, ...rows, ...summary].join('\n')
     downloadFile(csv, `支出_${todayStr()}.csv`, 'text/csv;charset=utf-8')
   }
 
@@ -152,8 +163,6 @@ export default function ExportImport({ categories, expenses, incomeCategories, i
     reader.readAsText(file, 'UTF-8')
   }
 
-  const totalExpense = expenses.reduce((s, e) => s + e.amount, 0)
-  const totalIncome = incomes.reduce((s, i) => s + i.amount, 0)
   const hasData = expenses.length > 0 || incomes.length > 0
 
   return (
