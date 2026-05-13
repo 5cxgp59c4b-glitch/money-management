@@ -230,9 +230,22 @@ input, select { font-family: inherit; }
 
 .fy-select {
   width: auto;
-  height: 34px;
+  height: 28px;
+  font-size: 11px;
+  padding: 0 26px 0 8px;
+  background-position: right 8px center;
+}
+
+.opening-balance-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.opening-balance-hint {
   font-size: 12px;
-  padding: 0 30px 0 10px;
+  color: var(--muted);
+  margin-top: 10px;
+  line-height: 1.6;
 }
 
 /* ── Saturated Feature Cards (Clay palette) ──────── */

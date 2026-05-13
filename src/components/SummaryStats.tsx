@@ -1,9 +1,10 @@
 import type { Expense, Income } from '../types'
-import { getCurrentFiscalYear } from '../utils/fiscalYear'
+import { getCurrentFiscalYear, getFiscalYearMonths } from '../utils/fiscalYear'
 
 interface Props {
   expenses: Expense[]
   incomes: Income[]
+  openingBalance: number
 }
 
 const fmt = new Intl.NumberFormat('ja-JP')
@@ -13,28 +14,20 @@ function getThisMonthKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
-export default function SummaryStats({ expenses, incomes }: Props) {
+export default function SummaryStats({ expenses, incomes, openingBalance }: Props) {
   const thisMonth = getThisMonthKey()
   const fy = getCurrentFiscalYear()
-  const aprilKey = `${fy}-04`
 
   const thisMonthExpense = expenses
     .filter((e) => e.date.startsWith(thisMonth))
     .reduce((s, e) => s + e.amount, 0)
 
-  const thisMonthIncome = incomes
-    .filter((i) => i.date.startsWith(thisMonth))
-    .reduce((s, i) => s + i.amount, 0)
+  const monthlyAvailable = Math.floor(openingBalance / 12)
 
-  // 4月初め（前年度末）の累計残高 ÷ 12 = 今月の使用可能額
-  const incomeBeforeApril = incomes
-    .filter((i) => i.date.slice(0, 7) < aprilKey)
-    .reduce((s, i) => s + i.amount, 0)
-  const expenseBeforeApril = expenses
-    .filter((e) => e.date.slice(0, 7) < aprilKey)
+  const fyMonths = new Set(getFiscalYearMonths(fy))
+  const fyExpense = expenses
+    .filter((e) => fyMonths.has(e.date.slice(0, 7)))
     .reduce((s, e) => s + e.amount, 0)
-  const balanceAtApril = incomeBeforeApril - expenseBeforeApril
-  const monthlyAvailable = Math.floor(balanceAtApril / 12)
 
   const totalIncome = incomes.reduce((s, i) => s + i.amount, 0)
   const totalExpense = expenses.reduce((s, e) => s + e.amount, 0)
@@ -42,10 +35,6 @@ export default function SummaryStats({ expenses, incomes }: Props) {
 
   return (
     <div className="stats-row">
-      <div className="stat-card stat-card-teal">
-        <span className="stat-label">今月の収入</span>
-        <span className="stat-value">¥{fmt.format(thisMonthIncome)}</span>
-      </div>
       <div className="stat-card stat-card-peach">
         <span className="stat-label">今月の支出</span>
         <span className="stat-value">¥{fmt.format(thisMonthExpense)}</span>
@@ -55,6 +44,10 @@ export default function SummaryStats({ expenses, incomes }: Props) {
         <span className="stat-value">
           {monthlyAvailable < 0 ? '-' : ''}¥{fmt.format(Math.abs(monthlyAvailable))}
         </span>
+      </div>
+      <div className="stat-card stat-card-teal">
+        <span className="stat-label">{fy}年度の支出額</span>
+        <span className="stat-value">¥{fmt.format(fyExpense)}</span>
       </div>
       <div className={`stat-card ${totalBalance >= 0 ? 'stat-card-lavender' : 'stat-card-coral'}`}>
         <span className="stat-label">総残高</span>
