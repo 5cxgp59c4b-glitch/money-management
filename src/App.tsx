@@ -29,7 +29,7 @@ const DEFAULT_INCOME_CATEGORIES: IncomeCategory[] = [
   { id: 'i4', name: 'その他', color: '#6a6a6a' },
 ]
 
-const DELETE_COUNT = 50
+const DELETE_COUNT = 20
 
 type QuotaState = {
   dataType: string
