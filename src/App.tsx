@@ -11,6 +11,7 @@ import IncomeCategoryManager from './components/IncomeCategoryManager'
 import CategoryPieChart from './components/CategoryPieChart'
 import MonthlyLineChart from './components/MonthlyLineChart'
 import BalanceTrendChart from './components/BalanceTrendChart'
+import ExpenseTrendChart from './components/ExpenseTrendChart'
 import SummaryStats from './components/SummaryStats'
 import ExportImport from './components/ExportImport'
 import StorageQuotaDialog from './components/StorageQuotaDialog'
@@ -188,6 +189,7 @@ export default function App() {
               <MonthlyLineChart expenses={expenses} incomes={incomes} />
             </div>
             <BalanceTrendChart expenses={expenses} incomes={incomes} />
+            <ExpenseTrendChart expenses={expenses} />
           </div>
         )}
       </main>

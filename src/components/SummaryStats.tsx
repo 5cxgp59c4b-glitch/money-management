@@ -1,4 +1,5 @@
 import type { Expense, Income } from '../types'
+import { getCurrentFiscalYear } from '../utils/fiscalYear'
 
 interface Props {
   expenses: Expense[]
@@ -14,6 +15,8 @@ function getThisMonthKey() {
 
 export default function SummaryStats({ expenses, incomes }: Props) {
   const thisMonth = getThisMonthKey()
+  const fy = getCurrentFiscalYear()
+  const aprilKey = `${fy}-04`
 
   const thisMonthExpense = expenses
     .filter((e) => e.date.startsWith(thisMonth))
@@ -23,7 +26,15 @@ export default function SummaryStats({ expenses, incomes }: Props) {
     .filter((i) => i.date.startsWith(thisMonth))
     .reduce((s, i) => s + i.amount, 0)
 
-  const thisMonthBalance = thisMonthIncome - thisMonthExpense
+  // 4月初め（前年度末）の累計残高 ÷ 12 = 今月の使用可能額
+  const incomeBeforeApril = incomes
+    .filter((i) => i.date.slice(0, 7) < aprilKey)
+    .reduce((s, i) => s + i.amount, 0)
+  const expenseBeforeApril = expenses
+    .filter((e) => e.date.slice(0, 7) < aprilKey)
+    .reduce((s, e) => s + e.amount, 0)
+  const balanceAtApril = incomeBeforeApril - expenseBeforeApril
+  const monthlyAvailable = Math.floor(balanceAtApril / 12)
 
   const totalIncome = incomes.reduce((s, i) => s + i.amount, 0)
   const totalExpense = expenses.reduce((s, e) => s + e.amount, 0)
@@ -39,10 +50,10 @@ export default function SummaryStats({ expenses, incomes }: Props) {
         <span className="stat-label">今月の支出</span>
         <span className="stat-value">¥{fmt.format(thisMonthExpense)}</span>
       </div>
-      <div className={`stat-card ${thisMonthBalance >= 0 ? 'stat-card-mint' : 'stat-card-coral'}`}>
+      <div className={`stat-card ${monthlyAvailable >= 0 ? 'stat-card-mint' : 'stat-card-coral'}`}>
         <span className="stat-label">今月の使用可能額</span>
         <span className="stat-value">
-          {thisMonthBalance < 0 ? '-' : ''}¥{fmt.format(Math.abs(thisMonthBalance))}
+          {monthlyAvailable < 0 ? '-' : ''}¥{fmt.format(Math.abs(monthlyAvailable))}
         </span>
       </div>
       <div className={`stat-card ${totalBalance >= 0 ? 'stat-card-lavender' : 'stat-card-coral'}`}>
