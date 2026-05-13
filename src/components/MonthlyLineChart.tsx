@@ -43,35 +43,37 @@ export default function MonthlyLineChart({ expenses }: Props) {
       <h2 className="card-title">月別支出推移</h2>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#E8E2DA" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#ebe6d6" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 12, fill: '#6B6560' }}
-            axisLine={{ stroke: '#E8E2DA' }}
+            tick={{ fontSize: 12, fill: '#6a6a6a', fontFamily: 'Noto Sans JP, sans-serif' }}
+            axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={(v: number) => `¥${fmt.format(v)}`}
-            tick={{ fontSize: 11, fill: '#6B6560' }}
+            tick={{ fontSize: 11, fill: '#6a6a6a', fontFamily: 'Noto Sans JP, sans-serif' }}
             axisLine={false}
             tickLine={false}
-            width={80}
+            width={82}
           />
           <Tooltip
             formatter={(value) => [`¥${fmt.format(Number(value))}`, '支出合計']}
             contentStyle={{
-              border: '1px solid #E8E2DA',
-              borderRadius: '8px',
+              border: '1.5px solid #e5e5e5',
+              borderRadius: '12px',
               fontSize: '13px',
+              background: '#fffaf0',
+              boxShadow: 'none',
             }}
           />
           <Line
             type="monotone"
             dataKey="total"
-            stroke="#C84B2F"
+            stroke="#1a3a3a"
             strokeWidth={2.5}
-            dot={{ fill: '#C84B2F', r: 4 }}
-            activeDot={{ r: 6 }}
+            dot={{ fill: '#1a3a3a', r: 4, strokeWidth: 0 }}
+            activeDot={{ r: 6, fill: '#1a3a3a', strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>

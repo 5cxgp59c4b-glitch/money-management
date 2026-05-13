@@ -56,10 +56,17 @@ export default function CategoryPieChart({ expenses, categories }: Props) {
           </Pie>
           <Tooltip
             formatter={(value) => [`¥${fmt.format(Number(value))}`, '金額']}
+            contentStyle={{
+              border: '1.5px solid #e5e5e5',
+              borderRadius: '12px',
+              fontSize: '13px',
+              background: '#fffaf0',
+              boxShadow: 'none',
+            }}
           />
           <Legend
             formatter={(value) => (
-              <span style={{ fontSize: '13px', color: '#1A1714' }}>{value}</span>
+              <span style={{ fontSize: '13px', color: '#3a3a3a', fontFamily: 'Noto Sans JP, sans-serif' }}>{value}</span>
             )}
           />
         </PieChart>

@@ -41,7 +41,7 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <span className="logo-mark">¥</span>
+            <span className="logo-mark">支</span>
             <span className="logo-text">支出管理</span>
           </div>
           <Navigation active={tab} onChange={setTab} />
