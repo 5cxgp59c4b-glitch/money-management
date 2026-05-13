@@ -48,13 +48,13 @@ export default function MonthlyLineChart({ expenses, incomes }: Props) {
 
   const data = fyMonths.map((month) => {
     const [y, mo] = month.split('-')
-    return { label: `${y}/${mo}`, 支出: monthlyExpense[month], 収入: monthlyIncome[month] }
+    return { label: `${y}/${mo}`, 支出: monthlyExpense[month] }
   })
 
   return (
     <section className="card">
       <div className="card-header">
-        <h2 className="card-title">月次収支推移</h2>
+        <h2 className="card-title">{selectedFY}年度 月次収支推移</h2>
         <select
           className="input fy-select"
           value={selectedFY}
@@ -85,7 +85,7 @@ export default function MonthlyLineChart({ expenses, incomes }: Props) {
               width={82}
             />
             <Tooltip
-              formatter={(value, name) => [`¥${fmt.format(Number(value))}`, name === '支出' ? '支出合計' : '収入合計']}
+              formatter={(value) => [`¥${fmt.format(Number(value))}`, '支出合計']}
               contentStyle={{
                 border: '1.5px solid #e5e5e5',
                 borderRadius: '12px',
@@ -101,14 +101,6 @@ export default function MonthlyLineChart({ expenses, incomes }: Props) {
               strokeWidth={2.5}
               dot={{ fill: '#C84B2F', r: 4, strokeWidth: 0 }}
               activeDot={{ r: 6, fill: '#C84B2F', strokeWidth: 0 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="収入"
-              stroke="#3A7BD5"
-              strokeWidth={2.5}
-              dot={{ fill: '#3A7BD5', r: 4, strokeWidth: 0 }}
-              activeDot={{ r: 6, fill: '#3A7BD5', strokeWidth: 0 }}
             />
           </LineChart>
         </ResponsiveContainer>

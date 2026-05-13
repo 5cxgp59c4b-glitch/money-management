@@ -40,7 +40,7 @@ export default function CategoryPieChart({ expenses, categories }: Props) {
   return (
     <section className="card">
       <div className="card-header">
-        <h2 className="card-title">カテゴリ別割合</h2>
+        <h2 className="card-title">{selectedFY}年度 カテゴリ別割合</h2>
         <select
           className="input fy-select"
           value={selectedFY}
