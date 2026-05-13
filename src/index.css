@@ -230,11 +230,23 @@ input, select { font-family: inherit; }
 }
 
 .fy-select {
-  width: auto;
-  height: 28px;
-  font-size: 11px;
-  padding: 0 26px 0 8px;
-  background-position: right 8px center;
+  width: fit-content;
+  height: 32px;
+  font-size: 16px;
+  padding: 0 24px 0 8px;
+  border: 1.5px solid var(--hairline);
+  border-radius: var(--rounded-sm);
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236a6a6a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 8px;
+  cursor: pointer;
+  outline: none;
 }
 
 .opening-balance-input-row {

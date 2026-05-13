@@ -44,7 +44,7 @@ export default function MonthlyLineChart({ expenses, incomes }: Props) {
       <div className="card-header">
         <h2 className="card-title">{selectedFY}年度 支出推移</h2>
         <select
-          className="input fy-select"
+          className="fy-select"
           value={selectedFY}
           onChange={(e) => setSelectedFY(Number(e.target.value))}
         >
