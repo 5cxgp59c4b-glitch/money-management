@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import type { Category, Expense, Income, IncomeCategory, TabType } from './types'
 import Navigation from './components/Navigation'
@@ -13,6 +13,7 @@ import MonthlyLineChart from './components/MonthlyLineChart'
 import BalanceTrendChart from './components/BalanceTrendChart'
 import SummaryStats from './components/SummaryStats'
 import ExportImport from './components/ExportImport'
+import StorageQuotaDialog from './components/StorageQuotaDialog'
 
 const DEFAULT_CATEGORIES: Category[] = [
   { id: '1', name: '食費', color: '#C84B2F' },
@@ -28,11 +29,57 @@ const DEFAULT_INCOME_CATEGORIES: IncomeCategory[] = [
   { id: 'i4', name: 'その他', color: '#6a6a6a' },
 ]
 
+const DELETE_COUNT = 50
+
+type QuotaState = {
+  dataType: string
+  onDeleteOld: () => void
+  onCancel: () => void
+} | null
+
 export default function App() {
+  const [quotaState, setQuotaState] = useState<QuotaState>(null)
+
+  const handleExpenseQuota = useCallback((rollback: () => void) => {
+    setQuotaState({
+      dataType: '支出',
+      onDeleteOld: () => {
+        setExpenses(prev => {
+          const sorted = [...prev].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          const toDelete = new Set(sorted.slice(0, DELETE_COUNT).map(e => e.id))
+          return prev.filter(e => !toDelete.has(e.id))
+        })
+        setQuotaState(null)
+      },
+      onCancel: () => {
+        rollback()
+        setQuotaState(null)
+      },
+    })
+  }, [])
+
+  const handleIncomeQuota = useCallback((rollback: () => void) => {
+    setQuotaState({
+      dataType: '収入',
+      onDeleteOld: () => {
+        setIncomes(prev => {
+          const sorted = [...prev].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          const toDelete = new Set(sorted.slice(0, DELETE_COUNT).map(i => i.id))
+          return prev.filter(i => !toDelete.has(i.id))
+        })
+        setQuotaState(null)
+      },
+      onCancel: () => {
+        rollback()
+        setQuotaState(null)
+      },
+    })
+  }, [])
+
   const [categories, setCategories] = useLocalStorage<Category[]>('mm_categories', DEFAULT_CATEGORIES)
-  const [expenses, setExpenses] = useLocalStorage<Expense[]>('mm_expenses', [])
+  const [expenses, setExpenses] = useLocalStorage<Expense[]>('mm_expenses', [], handleExpenseQuota)
   const [incomeCategories, setIncomeCategories] = useLocalStorage<IncomeCategory[]>('mm_income_categories', DEFAULT_INCOME_CATEGORIES)
-  const [incomes, setIncomes] = useLocalStorage<Income[]>('mm_incomes', [])
+  const [incomes, setIncomes] = useLocalStorage<Income[]>('mm_incomes', [], handleIncomeQuota)
   const [tab, setTab] = useState<TabType>('record')
 
   const addCategory = (cat: Category) => setCategories((prev) => [...prev, cat])
@@ -67,6 +114,14 @@ export default function App() {
 
   return (
     <div className="app">
+      {quotaState && (
+        <StorageQuotaDialog
+          dataType={quotaState.dataType}
+          deleteCount={DELETE_COUNT}
+          onDeleteOld={quotaState.onDeleteOld}
+          onCancel={quotaState.onCancel}
+        />
+      )}
       <header className="header">
         <div className="header-inner">
           <div className="logo">
