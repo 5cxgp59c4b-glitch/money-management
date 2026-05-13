@@ -254,9 +254,19 @@ input, select { font-family: inherit; }
   color: var(--ink);
 }
 
+.stat-card-mint {
+  background: var(--brand-mint);
+  color: var(--ink);
+}
+
+.stat-card-coral {
+  background: var(--brand-coral);
+  color: var(--on-dark);
+}
+
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 
@@ -567,6 +577,11 @@ select.input {
 }
 
 /* ── Empty State ─────────────────────────────────── */
+.income-amount {
+  color: var(--success);
+  font-weight: 600;
+}
+
 .empty-hint {
   color: var(--muted-soft);
   font-size: 13px;
@@ -580,6 +595,10 @@ select.input {
   .layout-two-col { grid-template-columns: 1fr; }
   .charts-grid     { grid-template-columns: 1fr; }
   .stats-row       { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 1200px) and (min-width: 961px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 640px) {

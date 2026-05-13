@@ -1,10 +1,17 @@
 import { useRef } from 'react'
-import type { Category, Expense } from '../types'
+import type { Category, Expense, Income, IncomeCategory } from '../types'
 
 interface Props {
   categories: Category[]
   expenses: Expense[]
-  onImport: (categories: Category[], expenses: Expense[]) => void
+  incomeCategories: IncomeCategory[]
+  incomes: Income[]
+  onImport: (
+    categories: Category[],
+    expenses: Expense[],
+    incomeCategories: IncomeCategory[],
+    incomes: Income[],
+  ) => void
 }
 
 interface JsonBackup {
@@ -12,6 +19,8 @@ interface JsonBackup {
   exportedAt: string
   categories: Category[]
   expenses: Expense[]
+  incomeCategories: IncomeCategory[]
+  incomes: Income[]
 }
 
 const fmt = new Intl.NumberFormat('ja-JP')
@@ -30,19 +39,21 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10).replace(/-/g, '')
 }
 
-export default function ExportImport({ categories, expenses, onImport }: Props) {
+export default function ExportImport({ categories, expenses, incomeCategories, incomes, onImport }: Props) {
   const jsonInputRef = useRef<HTMLInputElement>(null)
   const csvInputRef = useRef<HTMLInputElement>(null)
 
   // ── エクスポート ───────────────────────────────────
   const exportJson = () => {
     const backup: JsonBackup = {
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       categories,
       expenses,
+      incomeCategories,
+      incomes,
     }
-    downloadFile(JSON.stringify(backup, null, 2), `支出管理_${todayStr()}.json`, 'application/json')
+    downloadFile(JSON.stringify(backup, null, 2), `家計管理_${todayStr()}.json`, 'application/json')
   }
 
   const exportCsv = () => {
@@ -59,7 +70,7 @@ export default function ExportImport({ categories, expenses, onImport }: Props) 
         ].join(',')
       )
     const csv = '﻿' + [header, ...rows].join('\n')
-    downloadFile(csv, `支出管理_${todayStr()}.csv`, 'text/csv;charset=utf-8')
+    downloadFile(csv, `支出_${todayStr()}.csv`, 'text/csv;charset=utf-8')
   }
 
   // ── インポート ─────────────────────────────────────
@@ -71,8 +82,13 @@ export default function ExportImport({ categories, expenses, onImport }: Props) 
       try {
         const data = JSON.parse(ev.target?.result as string) as JsonBackup
         if (!data.categories || !data.expenses) throw new Error('形式が不正です')
-        if (!window.confirm(`${data.expenses.length} 件のデータをインポートします。現在のデータは上書きされます。よろしいですか？`)) return
-        onImport(data.categories, data.expenses)
+        if (!window.confirm(`${data.expenses.length} 件の支出・${(data.incomes ?? []).length} 件の収入をインポートします。現在のデータは上書きされます。よろしいですか？`)) return
+        onImport(
+          data.categories,
+          data.expenses,
+          data.incomeCategories ?? [],
+          data.incomes ?? [],
+        )
       } catch {
         alert('JSONファイルの読み込みに失敗しました。')
       } finally {
@@ -126,7 +142,7 @@ export default function ExportImport({ categories, expenses, onImport }: Props) 
         }
 
         if (!window.confirm(`${newExpenses.length} 件を追加インポートします。よろしいですか？`)) return
-        onImport(categories, [...expenses, ...newExpenses])
+        onImport(categories, [...expenses, ...newExpenses], incomeCategories, incomes)
       } catch {
         alert('CSVファイルの読み込みに失敗しました。')
       } finally {
@@ -136,7 +152,9 @@ export default function ExportImport({ categories, expenses, onImport }: Props) 
     reader.readAsText(file, 'UTF-8')
   }
 
-  const totalAmount = expenses.reduce((s, e) => s + e.amount, 0)
+  const totalExpense = expenses.reduce((s, e) => s + e.amount, 0)
+  const totalIncome = incomes.reduce((s, i) => s + i.amount, 0)
+  const hasData = expenses.length > 0 || incomes.length > 0
 
   return (
     <section className="card">
@@ -144,23 +162,23 @@ export default function ExportImport({ categories, expenses, onImport }: Props) 
 
       <div className="data-info">
         <span className="data-info-item">
-          <span className="data-info-label">記録件数</span>
-          <span className="data-info-value">{expenses.length} 件</span>
+          <span className="data-info-label">支出</span>
+          <span className="data-info-value">{expenses.length} 件 / ¥{fmt.format(totalExpense)}</span>
         </span>
         <span className="data-info-item">
-          <span className="data-info-label">累計</span>
-          <span className="data-info-value">¥{fmt.format(totalAmount)}</span>
+          <span className="data-info-label">収入</span>
+          <span className="data-info-value">{incomes.length} 件 / ¥{fmt.format(totalIncome)}</span>
         </span>
       </div>
 
       <div className="io-section">
         <p className="io-section-title">エクスポート</p>
         <div className="io-buttons">
-          <button className="btn btn--outline" onClick={exportJson} disabled={expenses.length === 0}>
+          <button className="btn btn--outline" onClick={exportJson} disabled={!hasData}>
             JSON でダウンロード
           </button>
           <button className="btn btn--outline" onClick={exportCsv} disabled={expenses.length === 0}>
-            CSV でダウンロード
+            CSV でダウンロード（支出）
           </button>
         </div>
       </div>
@@ -172,7 +190,7 @@ export default function ExportImport({ categories, expenses, onImport }: Props) 
             JSON から復元
           </button>
           <button className="btn btn--outline" onClick={() => csvInputRef.current?.click()}>
-            CSV から追加
+            CSV から追加（支出）
           </button>
         </div>
         <p className="io-hint">JSON: 全データを上書き復元 / CSV: 支出データを追加</p>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Category } from '../types'
+import type { IncomeCategory } from '../types'
 
 const PRESET_COLORS = [
   '#C84B2F', '#D4823A', '#C9B53A', '#5BAD6B',
@@ -7,12 +7,12 @@ const PRESET_COLORS = [
 ]
 
 interface Props {
-  categories: Category[]
-  onAdd: (category: Category) => void
+  incomeCategories: IncomeCategory[]
+  onAdd: (category: IncomeCategory) => void
   onDelete: (id: string) => void
 }
 
-export default function CategoryManager({ categories, onAdd, onDelete }: Props) {
+export default function IncomeCategoryManager({ incomeCategories, onAdd, onDelete }: Props) {
   const [name, setName] = useState('')
   const [color, setColor] = useState(PRESET_COLORS[0])
 
@@ -57,7 +57,7 @@ export default function CategoryManager({ categories, onAdd, onDelete }: Props) 
       </div>
 
       <ul className="category-list">
-        {categories.map((cat) => (
+        {incomeCategories.map((cat) => (
           <li key={cat.id} className="category-item">
             <span className="category-dot" style={{ backgroundColor: cat.color }} />
             <span className="category-name">{cat.name}</span>
@@ -70,7 +70,7 @@ export default function CategoryManager({ categories, onAdd, onDelete }: Props) 
             </button>
           </li>
         ))}
-        {categories.length === 0 && (
+        {incomeCategories.length === 0 && (
           <li className="empty-hint">カテゴリがありません</li>
         )}
       </ul>

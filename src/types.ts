@@ -12,4 +12,18 @@ export interface Expense {
   memo: string
 }
 
-export type TabType = 'record' | 'analytics'
+export interface IncomeCategory {
+  id: string
+  name: string
+  color: string
+}
+
+export interface Income {
+  id: string
+  incomeCategoryId: string
+  amount: number
+  date: string
+  memo: string
+}
+
+export type TabType = 'record' | 'income' | 'analytics'

@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage'
-import type { Category, Expense, TabType } from './types'
+import type { Category, Expense, Income, IncomeCategory, TabType } from './types'
 import Navigation from './components/Navigation'
 import ExpenseForm from './components/ExpenseForm'
 import CategoryManager from './components/CategoryManager'
 import ExpenseList from './components/ExpenseList'
+import IncomeForm from './components/IncomeForm'
+import IncomeList from './components/IncomeList'
+import IncomeCategoryManager from './components/IncomeCategoryManager'
 import CategoryPieChart from './components/CategoryPieChart'
 import MonthlyLineChart from './components/MonthlyLineChart'
+import BalanceTrendChart from './components/BalanceTrendChart'
 import SummaryStats from './components/SummaryStats'
 import ExportImport from './components/ExportImport'
 
@@ -17,9 +21,18 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: '4', name: '日用品', color: '#5BAD6B' },
 ]
 
+const DEFAULT_INCOME_CATEGORIES: IncomeCategory[] = [
+  { id: 'i1', name: '給与', color: '#3A7BD5' },
+  { id: 'i2', name: '副業', color: '#5BAD6B' },
+  { id: 'i3', name: 'ボーナス', color: '#C9B53A' },
+  { id: 'i4', name: 'その他', color: '#6a6a6a' },
+]
+
 export default function App() {
   const [categories, setCategories] = useLocalStorage<Category[]>('mm_categories', DEFAULT_CATEGORIES)
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('mm_expenses', [])
+  const [incomeCategories, setIncomeCategories] = useLocalStorage<IncomeCategory[]>('mm_income_categories', DEFAULT_INCOME_CATEGORIES)
+  const [incomes, setIncomes] = useLocalStorage<Income[]>('mm_incomes', [])
   const [tab, setTab] = useState<TabType>('record')
 
   const addCategory = (cat: Category) => setCategories((prev) => [...prev, cat])
@@ -31,9 +44,25 @@ export default function App() {
   const addExpense = (exp: Expense) => setExpenses((prev) => [exp, ...prev])
   const deleteExpense = (id: string) => setExpenses((prev) => prev.filter((e) => e.id !== id))
 
-  const handleImport = (cats: Category[], exps: Expense[]) => {
+  const addIncomeCategory = (cat: IncomeCategory) => setIncomeCategories((prev) => [...prev, cat])
+  const deleteIncomeCategory = (id: string) => {
+    setIncomeCategories((prev) => prev.filter((c) => c.id !== id))
+    setIncomes((prev) => prev.filter((i) => i.incomeCategoryId !== id))
+  }
+
+  const addIncome = (inc: Income) => setIncomes((prev) => [inc, ...prev])
+  const deleteIncome = (id: string) => setIncomes((prev) => prev.filter((i) => i.id !== id))
+
+  const handleImport = (
+    cats: Category[],
+    exps: Expense[],
+    incomeCats: IncomeCategory[],
+    incs: Income[],
+  ) => {
     setCategories(cats)
     setExpenses(exps)
+    setIncomeCategories(incomeCats)
+    setIncomes(incs)
   }
 
   return (
@@ -41,8 +70,8 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <span className="logo-mark">支</span>
-            <span className="logo-text">支出管理</span>
+            <span className="logo-mark">家</span>
+            <span className="logo-text">家計管理</span>
           </div>
           <Navigation active={tab} onChange={setTab} />
         </div>
@@ -61,6 +90,8 @@ export default function App() {
               <ExportImport
                 categories={categories}
                 expenses={expenses}
+                incomeCategories={incomeCategories}
+                incomes={incomes}
                 onImport={handleImport}
               />
             </div>
@@ -74,13 +105,34 @@ export default function App() {
           </div>
         )}
 
+        {tab === 'income' && (
+          <div className="layout-two-col">
+            <div className="col-left">
+              <IncomeForm incomeCategories={incomeCategories} onAdd={addIncome} />
+              <IncomeCategoryManager
+                incomeCategories={incomeCategories}
+                onAdd={addIncomeCategory}
+                onDelete={deleteIncomeCategory}
+              />
+            </div>
+            <div className="col-right">
+              <IncomeList
+                incomes={incomes}
+                incomeCategories={incomeCategories}
+                onDelete={deleteIncome}
+              />
+            </div>
+          </div>
+        )}
+
         {tab === 'analytics' && (
           <div className="layout-analytics">
-            <SummaryStats expenses={expenses} />
+            <SummaryStats expenses={expenses} incomes={incomes} />
             <div className="charts-grid">
               <CategoryPieChart expenses={expenses} categories={categories} />
-              <MonthlyLineChart expenses={expenses} />
+              <MonthlyLineChart expenses={expenses} incomes={incomes} />
             </div>
+            <BalanceTrendChart expenses={expenses} incomes={incomes} />
           </div>
         )}
       </main>

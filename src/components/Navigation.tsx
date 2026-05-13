@@ -12,7 +12,13 @@ export default function Navigation({ active, onChange }: Props) {
         className={`nav-tab${active === 'record' ? ' nav-tab--active' : ''}`}
         onClick={() => onChange('record')}
       >
-        記録
+        支出
+      </button>
+      <button
+        className={`nav-tab${active === 'income' ? ' nav-tab--active' : ''}`}
+        onClick={() => onChange('income')}
+      >
+        収入
       </button>
       <button
         className={`nav-tab${active === 'analytics' ? ' nav-tab--active' : ''}`}
