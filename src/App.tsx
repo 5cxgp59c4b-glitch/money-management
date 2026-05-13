@@ -70,8 +70,8 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <span className="logo-mark">家</span>
-            <span className="logo-text">家計管理</span>
+            <span className="logo-mark">M</span>
+            <span className="logo-text">マネーマネージメント</span>
           </div>
           <Navigation active={tab} onChange={setTab} />
         </div>
