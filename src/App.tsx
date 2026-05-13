@@ -13,10 +13,8 @@ import MonthlyLineChart from './components/MonthlyLineChart'
 import BalanceTrendChart from './components/BalanceTrendChart'
 import ExpenseTrendChart from './components/ExpenseTrendChart'
 import SummaryStats from './components/SummaryStats'
-import FiscalYearBalanceForm from './components/FiscalYearBalanceForm'
 import ExportImport from './components/ExportImport'
 import StorageQuotaDialog from './components/StorageQuotaDialog'
-import { getCurrentFiscalYear } from './utils/fiscalYear'
 
 const DEFAULT_CATEGORIES: Category[] = [
   { id: '1', name: '食費', color: '#C84B2F' },
@@ -83,14 +81,7 @@ export default function App() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('mm_expenses', [], handleExpenseQuota)
   const [incomeCategories, setIncomeCategories] = useLocalStorage<IncomeCategory[]>('mm_income_categories', DEFAULT_INCOME_CATEGORIES)
   const [incomes, setIncomes] = useLocalStorage<Income[]>('mm_incomes', [], handleIncomeQuota)
-  const [openingBalances, setOpeningBalances] = useLocalStorage<Record<string, number>>('mm_opening_balances', {})
   const [tab, setTab] = useState<TabType>('record')
-
-  const currentFY = getCurrentFiscalYear()
-  const currentOpeningBalance = openingBalances[String(currentFY)] ?? 0
-  const handleSaveOpeningBalance = (amount: number) => {
-    setOpeningBalances((prev) => ({ ...prev, [String(currentFY)]: amount }))
-  }
 
   const addCategory = (cat: Category) => setCategories((prev) => [...prev, cat])
   const deleteCategory = (id: string) => {
@@ -192,11 +183,7 @@ export default function App() {
 
         {tab === 'analytics' && (
           <div className="layout-analytics">
-            <FiscalYearBalanceForm
-              openingBalance={currentOpeningBalance}
-              onSave={handleSaveOpeningBalance}
-            />
-            <SummaryStats expenses={expenses} incomes={incomes} openingBalance={currentOpeningBalance} />
+            <SummaryStats expenses={expenses} incomes={incomes} />
             <div className="charts-grid">
               <CategoryPieChart expenses={expenses} categories={categories} />
               <MonthlyLineChart expenses={expenses} incomes={incomes} />
