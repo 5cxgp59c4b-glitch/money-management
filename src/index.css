@@ -226,6 +226,7 @@ input, select { font-family: inherit; }
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;
+  white-space: nowrap;
 }
 
 .fy-select {

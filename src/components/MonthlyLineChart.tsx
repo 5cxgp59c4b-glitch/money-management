@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import type { Expense, Income } from '../types'
-import { getFiscalYear, getCurrentFiscalYear, getFiscalYearMonths } from '../utils/fiscalYear'
+import { getFiscalYear, getCurrentFiscalYear } from '../utils/fiscalYear'
 
 interface Props {
   expenses: Expense[]
@@ -28,33 +28,21 @@ export default function MonthlyLineChart({ expenses, incomes }: Props) {
   ]))
   const availableFYs = Array.from(new Set([currentFY, ...allFYs])).sort((a, b) => b - a)
 
-  const fyMonths = getFiscalYearMonths(selectedFY)
-  const fyMonthSet = new Set(fyMonths)
+  const fyExpenses = expenses
+    .filter(e => getFiscalYear(e.date) === selectedFY)
+    .sort((a, b) => a.date.localeCompare(b.date))
 
-  const monthlyExpense: Record<string, number> = {}
-  const monthlyIncome: Record<string, number> = {}
-  for (const m of fyMonths) { monthlyExpense[m] = 0; monthlyIncome[m] = 0 }
+  const hasData = fyExpenses.length > 0
 
-  for (const exp of expenses) {
-    const m = exp.date.slice(0, 7)
-    if (fyMonthSet.has(m)) monthlyExpense[m] += exp.amount
-  }
-  for (const inc of incomes) {
-    const m = inc.date.slice(0, 7)
-    if (fyMonthSet.has(m)) monthlyIncome[m] += inc.amount
-  }
-
-  const hasData = fyMonths.some(m => monthlyExpense[m] > 0 || monthlyIncome[m] > 0)
-
-  const data = fyMonths.map((month) => {
-    const [y, mo] = month.split('-')
-    return { label: `${y}/${mo}`, 支出: monthlyExpense[month] }
+  const data = fyExpenses.map((exp) => {
+    const [, mo, d] = exp.date.split('-')
+    return { label: `${mo}/${d}`, 支出: exp.amount }
   })
 
   return (
     <section className="card">
       <div className="card-header">
-        <h2 className="card-title">{selectedFY}年度 月次収支推移</h2>
+        <h2 className="card-title">{selectedFY}年度 支出推移</h2>
         <select
           className="input fy-select"
           value={selectedFY}
@@ -85,7 +73,7 @@ export default function MonthlyLineChart({ expenses, incomes }: Props) {
               width={82}
             />
             <Tooltip
-              formatter={(value) => [`¥${fmt.format(Number(value))}`, '支出合計']}
+              formatter={(value) => [`¥${fmt.format(Number(value))}`, '支出']}
               contentStyle={{
                 border: '1.5px solid #e5e5e5',
                 borderRadius: '12px',
